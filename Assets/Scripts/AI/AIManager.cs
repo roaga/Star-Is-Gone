@@ -27,6 +27,9 @@ public class AIManager : MonoBehaviour {
     public float baseTouchingRange = 1.5f;
     float touchingRange;
     public int waypointRandomness = 1;
+    public bool reorientToPlayer = true;
+    float timeSinceReorientToPlayer = 0f;
+    public float timeToReorient = 10f;
     public float timeIdleAtWaypoint = 3f;
     public float baseSpeed = 1f;
     float speed;
@@ -124,6 +127,10 @@ public class AIManager : MonoBehaviour {
             timeAtCurrWaypoint = 0f;
         }
 
+        if (!stateInfo.IsName("Wandering")) {
+            timeSinceReorientToPlayer = 0f;
+        }
+
         // manage activity while in certain states
         if (stateInfo.IsName("Idle")) {
             // do nothing
@@ -137,14 +144,23 @@ public class AIManager : MonoBehaviour {
         } else if (stateInfo.IsName("Wandering")) {
             timeSincePlayerInView = 0f;
             if (moving) {
-                if (Vector3.Distance(gameObject.transform.position, waypoints[currWaypoint].transform.position) < 2f) {
-                    currWaypoint += Random.Range(1, 1 + waypointRandomness);
-                    if (currWaypoint >= waypoints.Count) {
-                        currWaypoint = 0;
+                if (reorientToPlayer) {
+                    MoveTowardPoint(lastPositionPlayerSeen);
+                    if (timeSinceReorientToPlayer > timeToReorient && !playerNear) {
+                        lastPositionPlayerSeen = player.transform.position;
+                        timeSinceReorientToPlayer = 0f;
                     }
-                } 
-                if (Vector3.Distance(gameObject.transform.position, waypoints[currWaypoint].transform.position) >= 2f) {
-                    MoveTowardPoint(waypoints[currWaypoint].transform.position);
+                    timeSinceReorientToPlayer += Time.deltaTime;
+                } else {
+                    if (Vector3.Distance(gameObject.transform.position, waypoints[currWaypoint].transform.position) < 2f) {
+                        currWaypoint += Random.Range(1, 1 + waypointRandomness);
+                        if (currWaypoint >= waypoints.Count) {
+                            currWaypoint = 0;
+                        }
+                    } 
+                    if (Vector3.Distance(gameObject.transform.position, waypoints[currWaypoint].transform.position) >= 2f) {
+                        MoveTowardPoint(waypoints[currWaypoint].transform.position);
+                    }
                 }
             }
         } else if (stateInfo.IsName("Searching")) {
