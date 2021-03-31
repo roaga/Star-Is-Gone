@@ -81,6 +81,10 @@ public class AIManager : MonoBehaviour {
         fov = baseFov;
         damage = baseDamage;
         moving = true;
+
+        if (reorientToPlayer) {
+            lastPositionPlayerSeen = player.transform.position;
+        }
     }
 
     // Update is called once per frame
@@ -145,10 +149,13 @@ public class AIManager : MonoBehaviour {
             timeSincePlayerInView = 0f;
             if (moving) {
                 if (reorientToPlayer) {
-                    MoveTowardPoint(lastPositionPlayerSeen);
                     if (timeSinceReorientToPlayer > timeToReorient && !playerNear) {
                         lastPositionPlayerSeen = player.transform.position;
                         timeSinceReorientToPlayer = 0f;
+                    } else if (Vector3.Distance(lastPositionPlayerSeen, transform.position) < 2f) {
+                        LookAround();
+                    } else {
+                        MoveTowardPoint(lastPositionPlayerSeen);
                     }
                     timeSinceReorientToPlayer += Time.deltaTime;
                 } else {
