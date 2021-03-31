@@ -329,7 +329,7 @@ public class AIManager : MonoBehaviour {
     }
 
     void LookAround() {
-        Vector3 randomDirection = Random.insideUnitSphere * baseDetectionRange;
+        Vector3 randomDirection = Random.insideUnitSphere * baseDetectionRange * 2f;
         randomDirection += transform.position;
         NavMeshHit hit;
         NavMesh.SamplePosition(randomDirection, out hit, baseDetectionRange * 5, 1);
